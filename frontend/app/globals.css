@@ -58,10 +58,100 @@
   }
 }
 
+
+html,
+body {
+  transform: none !important;
+  overflow-x: hidden;
+}
+
+.floating-ticket-wrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.ticket-tooltip {
+  position: absolute;
+  right: 48px;
+  background: #111;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.floating-ticket-wrapper:hover .ticket-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.floating-ticket-icon {
+  background: #fff;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+/* Subtle pulse animation */
+@keyframes floatPulse {
+  0% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.floating-ticket {
+  position: fixed;
+  bottom: 144px;
+  right: 24px;
+  z-index: 999999;
+  cursor: pointer;
+}
+
+.ticket-tooltip {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 12px;
+  background-color: #3813dc;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.floating-ticket:hover .ticket-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(-4px);
+}
+
 @keyframes gradient-x {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+
 .animate-gradient-x {
   background-size: 200% 200%;
   animation: gradient-x 3s ease-in-out infinite;
@@ -171,3 +261,4 @@ body {
     scroll-behavior: auto;
   }
 }
+
