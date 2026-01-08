@@ -16,12 +16,9 @@ export default function ContactUs() {
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null); // 'success' | 'error' | null
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
-  if (submitting) return;
-
   setSubmitting(true);
-  setStatus(null);
 
   try {
     const res = await fetch('/api/contact', {
@@ -30,31 +27,31 @@ export default function ContactUs() {
       body: JSON.stringify(formData),
     });
 
-    const data = await res.json();
+    const text = await res.text(); // 👈 IMPORTANT
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      alert('SERVER RETURNED NON-JSON RESPONSE:\n\n' + text);
+      return;
+    }
 
     if (!res.ok || !data.success) {
       alert(
-        `ERROR TYPE: ${data.error}\n\nDETAILS:\n${data.details || 'N/A'}`
+        `ERROR TYPE: ${data.error || 'UNKNOWN'}\n\nDETAILS:\n${data.details || text}`
       );
-      throw new Error(data.error);
+      return;
     }
 
     alert('Email sent successfully!');
-    setStatus('success');
-    setFormData({
-      name: '',
-      company: '',
-      email: '',
-      phone: '',
-      message: '',
-    });
-
   } catch (err) {
-    setStatus('error');
+    alert('FETCH ERROR:\n\n' + err.message);
   } finally {
     setSubmitting(false);
   }
 };
+
 
   const handleChange = (e) => {
     setFormData({
