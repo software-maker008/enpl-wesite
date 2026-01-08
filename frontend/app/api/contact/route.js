@@ -2,68 +2,50 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { name, company, email, phone, message } = body || {};
+    const { name, company, email, phone, message } = await request.json();
 
     if (!name || !email || !message) {
       return new Response(
         JSON.stringify({ success: false, error: 'Missing required fields' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400 }
       );
     }
 
-   const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: true, // MUST be true for port 465
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  // Add these options for better compatibility
-  tls: {
-    rejectUnauthorized: false
-  },
-  // Explicitly define the encryption method
-  requireTLS: true
-});
-
-    // Support one or multiple recipients via comma-separated list
-    const toEnv = process.env.CONTACT_TO || 'imvam12@gmail.com';
-    const toAddress = toEnv
-      .split(',')
-      .map((addr) => addr.trim())
-      .filter(Boolean);
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: true, // REQUIRED for 465
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
 
     const html = `
       <h2>New Contact Form Submission</h2>
-      <p><strong>Full Name:</strong> ${name}</p>
-      <p><strong>Company Name:</strong> ${company || '-'}</p>
-      <p><strong>Email Address:</strong> ${email}</p>
-      <p><strong>Phone Number:</strong> ${phone || '-'}</p>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Company:</strong> ${company || '-'}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone || '-'}</p>
       <p><strong>Message:</strong></p>
       <p style="white-space: pre-line">${message}</p>
     `;
 
     await transporter.sendMail({
-      from: process.env.CONTACT_FROM || process.env.SMTP_USER,
-      to: toAddress,
-      subject: `Contact Form: ${name}`,
+      from: `"Website Contact" <${process.env.CONTACT_FROM}>`,
+      to: process.env.CONTACT_TO.split(',').map(e => e.trim()),
       replyTo: email,
+      subject: `Contact Form: ${name}`,
       html,
     });
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+
   } catch (err) {
-    console.error('Contact API error:', err);
+    console.error('Email send failed:', err);
     return new Response(
-      JSON.stringify({ success: false, error: 'Failed to send message' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: false }),
+      { status: 500 }
     );
   }
 }
-
-
