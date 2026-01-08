@@ -17,30 +17,44 @@ export default function ContactUs() {
   const [status, setStatus] = useState(null); // 'success' | 'error' | null
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
-    setStatus(null);
+  e.preventDefault();
+  if (submitting) return;
 
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+  setSubmitting(true);
+  setStatus(null);
 
-      if (!res.ok) throw new Error('Request failed');
-      const data = await res.json();
-      if (!data?.success) throw new Error('Send failed');
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
 
-      setStatus('success');
-      setFormData({ name: '', company: '', email: '', phone: '', message: '' });
-    } catch (err) {
-      setStatus('error');
-    } finally {
-      setSubmitting(false);
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(
+        `ERROR TYPE: ${data.error}\n\nDETAILS:\n${data.details || 'N/A'}`
+      );
+      throw new Error(data.error);
     }
-  };
+
+    alert('Email sent successfully!');
+    setStatus('success');
+    setFormData({
+      name: '',
+      company: '',
+      email: '',
+      phone: '',
+      message: '',
+    });
+
+  } catch (err) {
+    setStatus('error');
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const handleChange = (e) => {
     setFormData({
