@@ -19,21 +19,23 @@ export default function ContactUs() {
  const handleSubmit = async (e) => {
   e.preventDefault();
   setSubmitting(true);
+  setStatus(null);
 
   try {
-    const res = await fetch('/api/contact', {
+    const res = await fetch('/send-mail.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     });
 
-    const text = await res.text(); // 👈 IMPORTANT
+    const text = await res.text();
     let data;
 
     try {
       data = JSON.parse(text);
     } catch {
       alert('SERVER RETURNED NON-JSON RESPONSE:\n\n' + text);
+      setStatus('error');
       return;
     }
 
@@ -41,16 +43,29 @@ export default function ContactUs() {
       alert(
         `ERROR TYPE: ${data.error || 'UNKNOWN'}\n\nDETAILS:\n${data.details || text}`
       );
+      setStatus('error');
       return;
     }
 
     alert('Email sent successfully!');
+    setStatus('success');
+
+    // Optional: reset form
+    setFormData({
+      name: '',
+      company: '',
+      email: '',
+      phone: '',
+      message: '',
+    });
   } catch (err) {
     alert('FETCH ERROR:\n\n' + err.message);
+    setStatus('error');
   } finally {
     setSubmitting(false);
   }
 };
+
 
 
   const handleChange = (e) => {
