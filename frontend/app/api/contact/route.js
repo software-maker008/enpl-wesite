@@ -50,13 +50,31 @@ const transporter = nodemailer.createTransport({
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (err) {
-    console.error('Contact API error:', err);
-    return new Response(
-      JSON.stringify({ success: false, error: 'Failed to send message' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+} catch (err) {
+  console.error('CONTACT API ERROR FULL:', {
+    name: err?.name,
+    message: err?.message,
+    code: err?.code,
+    command: err?.command,
+    response: err?.response,
+    responseCode: err?.responseCode,
+    stack: err?.stack,
+  });
+
+  return new Response(
+    JSON.stringify({
+      success: false,
+      error: err?.message || 'Unknown error',
+      code: err?.code || null,
+      response: err?.response || null,
+    }),
+    {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+}
+
 }
 
 
