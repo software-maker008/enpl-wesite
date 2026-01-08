@@ -11,15 +11,16 @@ export async function POST(request) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: Boolean(process.env.SMTP_SECURE === 'true'),
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
 
     // Support one or multiple recipients via comma-separated list
     const toEnv = process.env.CONTACT_TO || 'imvam12@gmail.com';
@@ -50,31 +51,13 @@ const transporter = nodemailer.createTransport({
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-} catch (err) {
-  console.error('CONTACT API ERROR FULL:', {
-    name: err?.name,
-    message: err?.message,
-    code: err?.code,
-    command: err?.command,
-    response: err?.response,
-    responseCode: err?.responseCode,
-    stack: err?.stack,
-  });
-
-  return new Response(
-    JSON.stringify({
-      success: false,
-      error: err?.message || 'Unknown error',
-      code: err?.code || null,
-      response: err?.response || null,
-    }),
-    {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
-}
-
+  } catch (err) {
+    console.error('Contact API error:', err);
+    return new Response(
+      JSON.stringify({ success: false, error: 'Failed to send message' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 
