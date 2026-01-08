@@ -2,6 +2,8 @@ export const runtime = "nodejs";
 
 export async function POST(request) {
   try {
+    console.log("CONTACT API HIT");
+
     const body = await request.json();
 
     const {
@@ -12,156 +14,83 @@ export async function POST(request) {
       message = "",
     } = body || {};
 
-    // Basic validation
     if (!name || !email || !message) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Missing required fields",
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
+      return Response.json(
+        { success: false, error: "Missing required fields" },
+        { status: 400 }
       );
     }
 
-    // ENV CHECK
     const apiKey = process.env.BREVO_API_KEY;
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Server misconfigured: BREVO_API_KEY missing",
-        }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
+      return Response.json(
+        { success: false, error: "BREVO_API_KEY missing" },
+        { status: 500 }
       );
     }
 
-    const fromEmail =
-      process.env.CONTACT_FROM || "hemant@ehsnetworks.in";
-    const fromName =
-      process.env.BREVO_SENDER_NAME || "Website Contact Form";
-
-    const toEnv =
-      process.env.CONTACT_TO || "imvam12@gmail.com";
-
-    const to = toEnv
+    const to = (process.env.CONTACT_TO || "")
       .split(",")
-      .map((addr) => addr.trim())
+      .map(e => e.trim())
       .filter(Boolean)
-      .map((addr) => ({ email: addr }));
-
-    const htmlContent = `
-      <h2>New Contact Form Submission</h2>
-      <table cellpadding="6" cellspacing="0" border="0">
-        <tr>
-          <td><strong>Name</strong></td>
-          <td>${escapeHtml(name)}</td>
-        </tr>
-        <tr>
-          <td><strong>Company</strong></td>
-          <td>${escapeHtml(company || "-")}</td>
-        </tr>
-        <tr>
-          <td><strong>Email</strong></td>
-          <td>${escapeHtml(email)}</td>
-        </tr>
-        <tr>
-          <td><strong>Phone</strong></td>
-          <td>${escapeHtml(phone || "-")}</td>
-        </tr>
-        <tr>
-          <td valign="top"><strong>Message</strong></td>
-          <td style="white-space: pre-line">${escapeHtml(message)}</td>
-        </tr>
-      </table>
-    `;
+      .map(email => ({ email }));
 
     const payload = {
       sender: {
-        name: fromName,
-        email: fromEmail,
+        name: process.env.BREVO_SENDER_NAME || "Website Contact",
+        email: process.env.CONTACT_FROM || "hemant@ehsnetworks.in",
       },
       to,
       subject: `Contact Form: ${name}`,
-      htmlContent,
-      replyTo: {
-        email,
-        name,
-      },
+      htmlContent: `
+        <h2>New Contact Form</h2>
+        <p><b>Name:</b> ${esc(name)}</p>
+        <p><b>Company:</b> ${esc(company || "-")}</p>
+        <p><b>Email:</b> ${esc(email)}</p>
+        <p><b>Phone:</b> ${esc(phone || "-")}</p>
+        <p><b>Message:</b><br/>${esc(message)}</p>
+      `,
+      replyTo: { email, name },
     };
 
-    const brevoResponse = await fetch(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          "content-type": "application/json",
-          "api-key": apiKey,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 10000); // ⏱️ 10s timeout
 
-    const brevoText = await brevoResponse.text();
+    const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
 
-    if (!brevoResponse.ok) {
-      console.error("Brevo error:", brevoText);
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Email sending failed",
-          details: safeJson(brevoText),
-        }),
-        {
-          status: 502,
-          headers: { "Content-Type": "application/json" },
-        }
+    const text = await resp.text();
+
+    if (!resp.ok) {
+      console.error("BREVO ERROR:", text);
+      return Response.json(
+        { success: false, error: "Brevo send failed", details: text },
+        { status: 502 }
       );
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return Response.json({ success: true });
+
   } catch (err) {
-    console.error("Contact API error:", err);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: "Unexpected server error",
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+    console.error("CONTACT API ERROR:", err);
+    return Response.json(
+      { success: false, error: "Server error" },
+      { status: 500 }
     );
   }
 }
 
-/* -------------------- helpers -------------------- */
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function safeJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
+function esc(v) {
+  return String(v)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
