@@ -64,6 +64,10 @@ const Partners = () => {
       logo: '/partners/partner14.png'
     },
     {
+      name: 'Lenovo',
+      logo: '/partners/lenovo.png'
+    },
+    {
       name: 'HP',
       logo: '/partners/hp.svg'
     },
