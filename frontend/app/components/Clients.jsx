@@ -7,10 +7,10 @@ import { Autoplay, Pagination } from 'swiper/modules';
 
 const Clients = () => {
   const clients = [
-    {
-      name: 'AEMA',
-      logo: '/client/aema-logo.png'
-    },
+    // {
+    //   name: 'AEMA',
+    //   logo: '/client/aema-logo.png'
+    // },
     {
       name: 'Client 1',
       logo: '/client/client_logo (1).png'
