@@ -19,10 +19,10 @@ const Clients = () => {
       name: 'Client 2',
       logo: '/client/client_logo (2).png'
     },
-    {
-      name: 'Client 3',
-      logo: '/client/client_logo (3).png'
-    },
+    // {
+    //   name: 'Client 3',
+    //   logo: '/client/client_logo (3).png'
+    // },
     {
       name: 'Client 4',
       logo: '/client/client_logo (4).png'
