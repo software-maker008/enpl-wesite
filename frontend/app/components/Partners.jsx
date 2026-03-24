@@ -28,6 +28,10 @@ const Partners = () => {
       logo: '/partners/partner5.png'
     },
     {
+      name: 'Netgear',
+      logo: '/partners/netgear.png'
+    },
+    {
       name: 'Hikvision',
       logo: '/partners/partner6.png'
     },
