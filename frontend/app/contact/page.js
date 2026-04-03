@@ -22,7 +22,7 @@ export default function ContactUs() {
   setStatus(null);
 
   try {
-    const res = await fetch('https://electrohelps.in/send-mail.php', {
+    const res = await fetch('/send-mail.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
