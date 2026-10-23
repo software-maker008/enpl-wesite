@@ -42,8 +42,8 @@ const Footer = () => {
       </div>
       
       <div className="relative z-10 px-4 py-12">
-        {/* Main Footer Content - 6 Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-8">
+        {/* Main Footer Content - 5 Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* ABOUT US */}
           <div className="animate-fade-in-up">
             <h3 className="text-lg font-semibold mb-4 text-white">ABOUT US</h3>
@@ -215,6 +215,22 @@ const Footer = () => {
           </div>
 
           
+
+          {/* D-U-N-S Registered Seal — displayed in the empty right column */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+            <h3 className="text-lg font-semibold mb-4 text-white">D-U-N-S REGISTERED</h3>
+            <iframe
+              id="Iframe1"
+              title="D-U-N-S Registered Seal"
+              src="https://dunsregistered.dnb.com/SealAuthentication.aspx?Cid=1"
+              width="114"
+              height="97"
+              frameBorder="0"
+              scrolling="no"
+              allowTransparency={true}
+              className="block border-0"
+            />
+          </div>
 
           {/* LINKS */}
           {/* <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
